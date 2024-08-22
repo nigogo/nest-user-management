@@ -1,0 +1,9 @@
+node_modules/
+dist/
+
+# IntelliJ project files
+.idea/
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
