@@ -7,6 +7,7 @@ async function bootstrap() {
 
   app.enableCors();
   app.use(helmet());
+  app.setGlobalPrefix('api/v1');
 
   await app.listen(3000);
 }
