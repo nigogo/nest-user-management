@@ -3,6 +3,11 @@
 ## Description
 This project is a simple user management system that allows users to register, login, view and update their profile. The project is built to the specifications of the [WHATEVER.WORKS User Management](https://github.com/whatever-works-dev/user-management) project.
 
+## Setup
+1. `npm install` (Install dependencies)
+2. `cp .env.example .env` (Create a .env file)
+3. `docker compose up -d` (Start api and db container)
+
 ## Initial Thoughts
 * Since the project is a simple user management system, I will focus on the process of building it, rather than speccing out the project.
 * FR and NFR haven't been discussed, so I will build to spec and make decisions based on my experience.

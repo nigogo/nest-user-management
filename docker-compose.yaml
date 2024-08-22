@@ -1,0 +1,39 @@
+services:
+  api:
+    container_name: user-management-api
+    build: .
+    ports:
+      - 3000:${API_PORT}
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=${API_NODE_ENV}
+      - PORT=${API_PORT}
+    depends_on:
+      - db
+    networks:
+      - user-management-network
+
+  db:
+    container_name: user-management-db
+    image: postgres:16
+    restart: always
+    shm_size: 128mb
+    ports:
+      - 5432:${DB_PORT}
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    networks:
+      - user-management-network
+    volumes:
+      - user-management-db-data:/var/lib/postgresql/data
+
+networks:
+  user-management-network:
+    driver: bridge
+
+volumes:
+  user-management-db-data:
+
