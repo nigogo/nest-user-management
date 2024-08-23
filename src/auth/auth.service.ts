@@ -31,6 +31,7 @@ export class AuthService {
 				}
 			}
 
+			// TODO log all errors in a custom exception filter
 			this.logger.error(e.message);
 			throw e;
 		}
