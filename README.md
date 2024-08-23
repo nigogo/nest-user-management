@@ -9,8 +9,8 @@ This project is a simple user management system that allows users to register, l
 3. `docker compose up -d` (Start api and db container)
 
 ### Testing
-1. `npm install -g dotenv-cli` (Install dotenv-cli)
-2. `npm run test` (Start interactive test runner)
+* `npm run test` (Run unit tests)
+* `npm run test:integration` (Run integration tests, Linux/MacOS only - see npm script)
 
 ### Troubleshooting
 * Windows handles docker volumes differently than Linux and MacOS. If you are using Windows, you may need to change the volume paths in the `docker-compose.yml` file.
