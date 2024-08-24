@@ -3,7 +3,7 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { UserDto } from './dto/user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { Prisma } from '@prisma/client';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -16,29 +16,26 @@ export class AuthService {
 			const user = await this.prisma.user.create({
 				data: {
 					username,
-					password: this.hashPassword(password),
+					password: await this.hashPassword(password),
 				},
 			});
 
-			this.logger.log(`User ${user.username} created`);
-
-			return user;
+			// plainToInstance is used as a safeguard to ensure that no sensitive data is returned
+			return plainToInstance(UserDto, user);
 		} catch (e) {
-			if (e instanceof Prisma.PrismaClientKnownRequestError) {
-				if (e.code === 'P2002') {
-					const message = `User with username ${username} already exists`;
-					throw new ConflictException(message);
-				}
+			if (e.code === 'P2002') {
+				const message = `User with username '${username}' already exists`;
+				this.logger.error(message);
+				throw new ConflictException(message);
 			}
 
-			// TODO log all errors in a custom exception filter
-			this.logger.error(e.message);
+			this.logger.error(e);
 			throw e;
 		}
 	}
 
 	// public modifier for testing purposes, generally this is not recommended
-	public hashPassword(password: string) {
-		return bcrypt.hashSync(password, 10);
+	public async hashPassword(password: string) {
+		return bcrypt.hash(password, 10);
 	}
 }

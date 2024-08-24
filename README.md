@@ -6,20 +6,26 @@ This project is a simple user management system that allows users to register, l
 ## Setup
 1. `npm install` (Install dependencies)
 2. `cp .env.example .env` (Create a .env file)
-3. `docker compose up -d` (Start api and db container)
+3. `docker compose up db -d` (Start the database container)
+4. `npm run prisma:generate` (Generate Prisma client)
+5. `npm run prisma:migrate` (Run migrations)
+6. `npm run start:dev:local` (Start the api in development mode)
+
+Use `docker compose up api db -d` for fully containerized project.
 
 ### Testing
 * `npm run test` (Run unit tests)
-* `npm run test:integration` (Run integration tests, Linux/MacOS only - see npm script)
+* `npm run test:e2e` (Run e2e tests, Linux/MacOS only - see npm script)
+* `npm run test:e2e` (Run again if the first run fails, docker container may not be ready)
 
 ### Troubleshooting
 * Windows handles docker volumes differently than Linux and MacOS. If you are using Windows, you may need to change the volume paths in the `docker-compose.yml` file.
 * If you are having trouble with the database, you may need to run `docker compose down -v` to remove the volumes.
-* If all else fails, you can start the database with `docker compose up -d db` and run `npx prisma migrate dev` to create the database. Then you can start the api with `npm run start`.
 
 ## Decisions
-* I decided to write unit test for the logic in the service layer and integration tests for the controllers.
-* I wanted to have a test database for integration tests, so I set up `test:integration` script to start a test database container and run all controller tests in watch mode.
+* I will not test controllers directly, but instead use e2e tests for confidence in application behavior and DTO unit tests for controllers.
+* I decided to write unit test for the logic in the service layer ~~and integration tests for the controllers~~.
+* I wanted to have a test database for ~~integration~~ e2e tests, so I set up `test:e2e` script to start a test database container and run all controller tests in watch mode.
 
 ## Initial Thoughts
 * Since the project is a simple user management system, I will focus on the process of building it, rather than speccing out the project.

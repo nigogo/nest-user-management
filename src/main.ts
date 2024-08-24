@@ -7,10 +7,35 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
-	app.enableCors();
-	app.use(helmet());
+	app.enableCors({
+		origin: 'localhost:3000',
+		allowedHeaders: ['Content-Type', 'Authorization'],
+		methods: ['GET', 'POST', 'PUT', 'DELETE'],
+		credentials: true,
+	});
+	app.use(
+		helmet({
+			contentSecurityPolicy: {
+				directives: {
+					defaultSrc: ["'self'"],
+					styleSrc: ["'self'", "'unsafe-inline'"],
+					scriptSrc: ["'self'", "'unsafe-inline'"],
+					imgSrc: ["'self'", 'data:'],
+				},
+			},
+		})
+	);
 	app.setGlobalPrefix('api/v1');
-	app.useGlobalPipes(new ValidationPipe());
+	app.useGlobalPipes(
+		new ValidationPipe({
+			whitelist: true,
+			forbidNonWhitelisted: true,
+			transform: true,
+			transformOptions: {
+				enableImplicitConversion: true,
+			},
+		})
+	);
 
 	// TODO Disable Swagger in production (it will negatively impact cold start times)
 	const config = new DocumentBuilder()

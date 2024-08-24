@@ -6,16 +6,16 @@ import {
 	ValidationOptions,
 } from 'class-validator';
 
-export type IsUsernameOptions = {
+export type IsValidUsernameOptions = {
 	minLength?: number;
 	maxLength?: number;
 	allowedCharacters?: RegExp;
 };
 
 @ValidatorConstraint({ async: false })
-export class IsUsernameConstraint implements ValidatorConstraintInterface {
+export class IsValidUsernameConstraint implements ValidatorConstraintInterface {
 	validate(username: string, args: ValidationArguments): boolean {
-		const [options] = args.constraints as [IsUsernameOptions];
+		const [options] = args.constraints as [IsValidUsernameOptions];
 		// set sane defaults if no options are provided
 		const {
 			minLength = 4,
@@ -39,8 +39,8 @@ export class IsUsernameConstraint implements ValidatorConstraintInterface {
 	}
 }
 
-export function IsUsername(
-	options?: IsUsernameOptions,
+export function IsValidUsername(
+	options?: IsValidUsernameOptions,
 	validationOptions?: ValidationOptions
 ) {
 	return function (object: object, propertyName: string) {
@@ -49,7 +49,7 @@ export function IsUsername(
 			propertyName: propertyName,
 			options: validationOptions,
 			constraints: [options],
-			validator: IsUsernameConstraint,
+			validator: IsValidUsernameConstraint,
 		});
 	};
 }
