@@ -1,9 +1,15 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+	ConflictException,
+	Injectable,
+	Logger,
+	NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { UserDto } from '../auth/dto/user.dto';
 import { plainToInstance } from 'class-transformer';
 import { User } from '../interfaces/user.interface';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -45,6 +51,29 @@ export class UsersService {
 					throw new NotFoundException(
 						`User with username ${username} not found`
 					);
+				}
+			}
+			this.logger.error(e);
+			throw e;
+		}
+	}
+
+	async updateUser(id: number, { username }: UpdateUserDto): Promise<UserDto> {
+		try {
+			const user = await this.prisma.user.update({
+				where: { id },
+				data: { username },
+			});
+
+			// TODO logout user?
+
+			return plainToInstance(UserDto, user);
+		} catch (e) {
+			if (e instanceof Prisma.PrismaClientKnownRequestError) {
+				if (e.code === 'P2002') {
+					const message = `User with username '${username}' already exists`;
+					this.logger.error(message);
+					throw new ConflictException(message);
 				}
 			}
 			this.logger.error(e);

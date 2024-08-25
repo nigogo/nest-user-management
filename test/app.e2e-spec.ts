@@ -194,11 +194,11 @@ describe('Application Behavior Tests (e2e)', () => {
 	});
 
 	it('/users/me (PATCH) - should update the user profile', async () => {
-		const updatedUsername = 'new_username';
 		const accessToken = await registerUserAndLogin();
+		const updatedUsername = 'new_username';
 
 		await request(app.getHttpServer())
-			.patch('/profile/me')
+			.patch('/users/me')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send({ username: updatedUsername })
 			.expect((res) => {
@@ -213,18 +213,29 @@ describe('Application Behavior Tests (e2e)', () => {
 	});
 
 	it('/users/me (PATCH) - should fail if the username already exists', async () => {
-		const updatedUsername = 'new_username';
-		await registerUserAndLogin({
-			username: updatedUsername,
-			password: 'password',
-		});
 		const accessToken = await registerUserAndLogin();
+		const updatedUsername = 'new_username';
+
+		await request(app.getHttpServer())
+			.post('/auth/register')
+			.send({ ...registerUserDto, username: updatedUsername })
+			.expect(201);
 
 		await request(app.getHttpServer())
 			.patch('/users/me')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send({ username: 'new_username' })
 			.expect(409);
+	});
+
+	it('/users/me (PATCH) - should return 200 if no data is changed', async () => {
+		const accessToken = await registerUserAndLogin();
+
+		await request(app.getHttpServer())
+			.patch('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send({ username: registerUserDto.username })
+			.expect(200);
 	});
 
 	// register user and login helper function, uses the default test data if no DTO is provided

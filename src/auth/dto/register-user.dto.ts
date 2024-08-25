@@ -1,35 +1,19 @@
 import { IsValidUsername } from '../../decorators/is-valid-username.decorator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsValidPassword } from '../../decorators/is-valid-password.decorator';
+import {
+	passwordMessage,
+	passwordOptions,
+	usernameMessage,
+	usernameOptions,
+} from '../../common/validation-options';
 
 export class RegisterUserDto {
-	@IsValidUsername(
-		{
-			minLength: 4,
-			maxLength: 16,
-			allowedCharacters: /^[a-zA-Z0-9_]+$/,
-		},
-		{
-			message:
-				'Username must be between 4 and 16 characters long and can only contain letters, numbers, and underscores',
-		}
-	)
+	@IsValidUsername(usernameOptions, { message: usernameMessage })
 	@ApiProperty({ required: true })
 	username: string;
 
-	@IsValidPassword(
-		{
-			minLength: 8,
-			maxLength: 64,
-			minUppercase: 1,
-			minNumbers: 1,
-			minSymbols: 1,
-		},
-		{
-			message:
-				'Password must be between 8 and 64 characters long and contain at least one uppercase letter, one number, and one special character',
-		}
-	)
+	@IsValidPassword(passwordOptions, { message: passwordMessage })
 	@ApiProperty({ required: true })
 	password: string;
 }
