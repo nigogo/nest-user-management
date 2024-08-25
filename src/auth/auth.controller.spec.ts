@@ -12,6 +12,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { mockDeep } from 'jest-mock-extended';
 import { PrismaClient } from '@prisma/client';
+import { JwtBlacklistService } from './jwt-blacklist.service';
 
 describe('AuthController', () => {
 	let controller: AuthController;
@@ -27,7 +28,13 @@ describe('AuthController', () => {
 				}),
 			],
 			controllers: [AuthController],
-			providers: [AuthService, PrismaService, LocalStrategy, JwtStrategy],
+			providers: [
+				AuthService,
+				PrismaService,
+				LocalStrategy,
+				JwtStrategy,
+				JwtBlacklistService,
+			],
 		})
 			.overrideProvider(PrismaService)
 			.useValue({

@@ -44,6 +44,8 @@ async function bootstrap() {
 			'A simple user management API that allows a user to register, login, view and update their profile.'
 		)
 		.setVersion('1.0')
+		.addBearerAuth()
+		.addSecurityRequirements('bearer')
 		.build();
 	const document = SwaggerModule.createDocument(app, config);
 	SwaggerModule.setup('api/v1', app, document);

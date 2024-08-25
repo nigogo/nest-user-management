@@ -16,6 +16,8 @@ import { User } from '../interfaces/user.interface';
 import { AccessTokenDto } from './dto/access-token.dto';
 import { Request } from 'express';
 import { LoginUserDto } from './dto/login-user.dto';
+import { GetAccessToken } from '../decorators/get-access-token.decorator';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -37,10 +39,10 @@ export class AuthController {
 		return this.authService.login(req.user);
 	}
 
-	@UseGuards(LocalAuthGuard)
+	@UseGuards(JwtAuthGuard)
 	@Get('logout')
-	logout(@Req() req: Request & { user: User }): Promise<void> {
-		// TODO get token instead of user
-		return this.authService.logout(req.user);
+	@HttpCode(200)
+	logout(@GetAccessToken() token: string): Promise<void> {
+		return this.authService.logout(token);
 	}
 }

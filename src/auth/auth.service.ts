@@ -10,6 +10,8 @@ import { User } from '../interfaces/user.interface';
 import { AccessTokenDto } from './dto/access-token.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { JwtBlacklistService } from './jwt-blacklist.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +20,8 @@ export class AuthService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly usersService: UsersService,
-		private readonly jwtService: JwtService
+		private readonly jwtService: JwtService,
+		private readonly jwtBlacklistService: JwtBlacklistService
 	) {}
 
 	async register({ username, password }: RegisterUserDto): Promise<UserDto> {
@@ -45,15 +48,28 @@ export class AuthService {
 	}
 
 	async login(user: User): Promise<AccessTokenDto> {
-		const payload: JwtPayload = { sub: user.id, username: user.username };
+		const payload: JwtPayload = {
+			sub: user.id,
+			username: user.username,
+			jti: uuidv4(),
+		};
 		return {
 			// TODO use RS256 algorithm
 			access_token: this.jwtService.sign(payload),
 		};
 	}
 
-	async logout(user: User): Promise<void> {
-		// TODO insert jti into redis blacklist
+	async logout(token: string): Promise<void> {
+		const decoded = this.jwtService.decode(token) as JwtPayload;
+
+		if (!decoded || !decoded.jti || !decoded.exp) {
+			throw new Error('Invalid token');
+		}
+
+		this.jwtBlacklistService.blacklistToken({
+			jti: decoded.jti,
+			exp: decoded.exp,
+		});
 	}
 
 	async validateUser({

@@ -124,8 +124,6 @@ describe('Application Behavior Tests (e2e)', () => {
 	it('/users/me (GET) - should return the user profile', async () => {
 		const accessToken = await registerUserAndLogin();
 
-		console.log('accessToken', accessToken);
-
 		await request(app.getHttpServer())
 			.get('/users/me')
 			.set('Authorization', `Bearer ${accessToken}`)
@@ -154,7 +152,7 @@ describe('Application Behavior Tests (e2e)', () => {
 	it('/users/me (GET) - should fail if the access token is expired', async () => {
 		const accessToken = await registerUserAndLogin();
 
-		await new Promise((resolve) => setTimeout(resolve, 2000));
+		await new Promise((resolve) => setTimeout(resolve, 3000));
 
 		await request(app.getHttpServer())
 			.get('/users/me')
@@ -162,11 +160,11 @@ describe('Application Behavior Tests (e2e)', () => {
 			.expect(401);
 	});
 
-	it('/auth/logout (POST) - should invalidate the access token', async () => {
+	it('/auth/logout (POST) - should revoke the access token', async () => {
 		const accessToken = await registerUserAndLogin();
 
 		await request(app.getHttpServer())
-			.post('/auth/logout')
+			.get('/auth/logout')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.expect(200);
 
@@ -174,6 +172,25 @@ describe('Application Behavior Tests (e2e)', () => {
 			.get('/users/me')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.expect(401);
+	});
+
+	it('/auth/logout (POST) - should revoke the current access token only', async () => {
+		const previousAccessToken = await registerUserAndLogin();
+		const { body } = await request(app.getHttpServer())
+			.post('/auth/login')
+			.send(registerUserDto)
+			.expect(200);
+		const currentAccessToken = body.access_token;
+
+		await request(app.getHttpServer())
+			.get('/auth/logout')
+			.set('Authorization', `Bearer ${currentAccessToken}`)
+			.expect(200);
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${previousAccessToken}`)
+			.expect(200);
 	});
 
 	// register user and login helper function, uses the default test data if no DTO is provided
