@@ -156,22 +156,22 @@ describe('Application Behavior Tests (e2e)', () => {
 			.expect(401);
 	});
 
-	// it('/users/me (GET) - should fail if the access token is expired', async () => {
-	// 	await request(app.getHttpServer())
-	// 		.post('/auth/register')
-	// 		.send(registerUserDto)
-	// 		.expect(201);
-	//
-	// 	const { body } = await request(app.getHttpServer())
-	// 		.post('/auth/login')
-	// 		.send(registerUserDto)
-	// 		.expect(200);
-	//
-	// 	await new Promise((resolve) => setTimeout(resolve, 2000));
-	//
-	// 	await request(app.getHttpServer())
-	// 		.get('/users/me')
-	// 		.set('Authorization', `Bearer ${body.access_token}`)
-	// 		.expect(401);
-	// });
+	it('/users/me (GET) - should fail if the access token is expired', async () => {
+		await request(app.getHttpServer())
+			.post('/auth/register')
+			.send(registerUserDto)
+			.expect(201);
+
+		const { body } = await request(app.getHttpServer())
+			.post('/auth/login')
+			.send(registerUserDto)
+			.expect(200);
+
+		await new Promise((resolve) => setTimeout(resolve, 2000));
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${body.access_token}`)
+			.expect(401);
+	});
 });
