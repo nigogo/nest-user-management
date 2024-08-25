@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Get,
 	HttpCode,
 	Post,
 	Req,
@@ -34,5 +35,12 @@ export class AuthController {
 	@ApiBody({ type: LoginUserDto, required: true })
 	login(@Req() req: Request & { user: User }): Promise<AccessTokenDto> {
 		return this.authService.login(req.user);
+	}
+
+	@UseGuards(LocalAuthGuard)
+	@Get('logout')
+	logout(@Req() req: Request & { user: User }): Promise<void> {
+		// TODO get token instead of user
+		return this.authService.logout(req.user);
 	}
 }

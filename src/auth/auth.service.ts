@@ -52,6 +52,10 @@ export class AuthService {
 		};
 	}
 
+	async logout(user: User): Promise<void> {
+		// TODO insert jti into redis blacklist
+	}
+
 	async validateUser({
 		username,
 		password,
