@@ -4,12 +4,39 @@ import { UserDto } from './dto/user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
+import { UsersService } from '../users/users.service';
+import { LoginDto } from './dto/login.dto';
+import { User } from '../interfaces/user.interface';
+import { AccessTokenDto } from './dto/access-token.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
 	private readonly logger = new Logger(AuthService.name);
 
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly usersService: UsersService,
+		private readonly jwtService: JwtService
+	) {}
+
+	async validateUser({ username, password }: LoginDto): Promise<User | null> {
+		const user = await this.usersService.getUserByUsername(username);
+		if (user && bcrypt.compareSync(password, user.password)) {
+			return {
+				id: user.id,
+				username: user.username,
+			};
+		}
+		return null;
+	}
+
+	async login(user: User): Promise<AccessTokenDto> {
+		const payload = { username: user.username, sub: user.id };
+		return {
+			access_token: this.jwtService.sign(payload),
+		};
+	}
 
 	async register({ username, password }: RegisterUserDto): Promise<UserDto> {
 		try {

@@ -73,4 +73,19 @@ describe('Application Behavior Tests (e2e)', () => {
 				expect(res.body.message).toHaveLength(2);
 			});
 	});
+
+	it('/auth/login (POST) - should return an access token', async () => {
+		await request(app.getHttpServer())
+			.post('/auth/register')
+			.send(registerUserDto)
+			.expect(201);
+
+		await request(app.getHttpServer())
+			.post('/auth/login')
+			.send(registerUserDto)
+			.expect((res) => {
+				expect(res.status).toBe(201);
+				expect(res.body).toHaveProperty('access_token');
+			});
+	});
 });
