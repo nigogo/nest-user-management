@@ -7,7 +7,7 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { User } from '../interfaces/user.interface';
 import { AccessTokenDto } from './dto/access-token.dto';
 import { Request } from 'express';
-import { LoginDto } from './dto/login.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -21,7 +21,7 @@ export class AuthController {
 
 	@UseGuards(LocalAuthGuard)
 	@Post('login')
-	@ApiBody({ type: LoginDto, required: true })
+	@ApiBody({ type: LoginUserDto, required: true })
 	login(@Req() req: Request & { user: User }): Promise<AccessTokenDto> {
 		return this.authService.login(req.user);
 	}

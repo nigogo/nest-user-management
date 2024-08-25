@@ -84,7 +84,6 @@ describe('Application Behavior Tests (e2e)', () => {
 			.post('/auth/login')
 			.send(registerUserDto)
 			.expect((res) => {
-				console.log(JSON.stringify(res.body, null, 2));
 				expect(res.status).toBe(201);
 				expect(res.body).toHaveProperty('access_token');
 			});
