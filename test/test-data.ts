@@ -7,15 +7,19 @@ I made this trade-off because it is closer to a real-world scenario where the te
 
 import { RegisterUserDto } from '../src/auth/dto/register-user.dto';
 import { UserDto } from '../src/auth/dto/user.dto';
+import { User } from '../src/interfaces/user.interface';
 
 export const registerUserDto: RegisterUserDto = {
 	username: 'john_doe',
 	password: 'P4$$w0rd',
 };
 
-export const userDto: UserDto = {
+export const user: User = {
 	id: 1,
 	username: registerUserDto.username,
-	createdAt: new Date('2023-08-23T00:00:00Z'),
-	updatedAt: new Date('2023-08-23T00:00:00Z'),
+	password: 'password-hash',
+};
+
+export const userDto: UserDto = {
+	username: registerUserDto.username,
 };

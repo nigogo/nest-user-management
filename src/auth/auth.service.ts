@@ -9,6 +9,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { User } from '../interfaces/user.interface';
 import { AccessTokenDto } from './dto/access-token.dto';
 import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -20,27 +21,6 @@ export class AuthService {
 		private readonly jwtService: JwtService
 	) {}
 
-	async validateUser({
-		username,
-		password,
-	}: LoginUserDto): Promise<User | null> {
-		const user = await this.usersService.getUserByUsername(username);
-		if (user && bcrypt.compareSync(password, user.password)) {
-			return {
-				id: user.id,
-				username: user.username,
-			};
-		}
-		return null;
-	}
-
-	async login(user: User): Promise<AccessTokenDto> {
-		const payload = { username: user.username, sub: user.id };
-		return {
-			access_token: this.jwtService.sign(payload),
-		};
-	}
-
 	async register({ username, password }: RegisterUserDto): Promise<UserDto> {
 		try {
 			const user = await this.prisma.user.create({
@@ -50,7 +30,7 @@ export class AuthService {
 				},
 			});
 
-			// plainToInstance is used as a safeguard to ensure that no sensitive data is returned
+			// note: plainToInstance is used as a safeguard to ensure that no sensitive data is returned
 			return plainToInstance(UserDto, user);
 		} catch (e) {
 			if (e.code === 'P2002') {
@@ -64,8 +44,35 @@ export class AuthService {
 		}
 	}
 
-	// public modifier for testing purposes, generally this is not recommended
+	async login(user: User): Promise<AccessTokenDto> {
+		const payload: JwtPayload = { sub: user.id, username: user.username };
+		return {
+			access_token: this.jwtService.sign(payload),
+		};
+	}
+
+	async validateUser({
+		username,
+		password,
+	}: LoginUserDto): Promise<User | null> {
+		const user = await this.usersService.getUserForInternalUse(username);
+		const isCorrectPassword =
+			user?.password && (await this.comparePasswords(password, user?.password));
+		if (isCorrectPassword) {
+			return {
+				id: user.id,
+				username: user.username,
+			};
+		}
+		return null;
+	}
+
+	// public modifiers for testing purposes, generally this is not recommended
 	public async hashPassword(password: string) {
 		return bcrypt.hash(password, 10);
+	}
+
+	public async comparePasswords(password: string, hash: string) {
+		return bcrypt.compare(password, hash);
 	}
 }

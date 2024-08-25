@@ -2,26 +2,42 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { registerUserDto } from '../../test/test-data';
+import { registerUserDto, userDto } from '../../test/test-data';
 import { validate } from 'class-validator';
 import { RegisterUserDto } from './dto/register-user.dto';
+import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { UsersModule } from '../users/users.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { mockDeep } from 'jest-mock-extended';
+import { PrismaClient } from '@prisma/client';
 
 describe('AuthController', () => {
 	let controller: AuthController;
-	let prisma: PrismaService;
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
+			imports: [
+				UsersModule,
+				PassportModule,
+				JwtModule.register({
+					secret: 'secret',
+					signOptions: { expiresIn: '2m' },
+				}),
+			],
 			controllers: [AuthController],
-			providers: [AuthService, PrismaService],
-		}).compile();
+			providers: [AuthService, PrismaService, LocalStrategy, JwtStrategy],
+		})
+			.overrideProvider(PrismaService)
+			.useValue({
+				user: mockDeep<PrismaClient['user']>({
+					create: jest.fn().mockResolvedValue(userDto),
+				}),
+			})
+			.compile();
 
 		controller = module.get<AuthController>(AuthController);
-		prisma = module.get<PrismaService>(PrismaService);
-	});
-
-	afterEach(async () => {
-		await prisma.user.deleteMany();
 	});
 
 	it('should be defined', () => {
