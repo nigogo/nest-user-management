@@ -47,6 +47,7 @@ export class AuthService {
 	async login(user: User): Promise<AccessTokenDto> {
 		const payload: JwtPayload = { sub: user.id, username: user.username };
 		return {
+			// TODO use RS256 algorithm
 			access_token: this.jwtService.sign(payload),
 		};
 	}
