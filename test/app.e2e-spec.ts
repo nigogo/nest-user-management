@@ -32,10 +32,10 @@ describe('Application Behavior Tests (e2e)', () => {
 			.expect((res) => {
 				expect(res.status).toBe(201);
 				expect(res.body).toBeDefined();
-				expect(res.body).toHaveProperty('id');
+				expect(res.body).not.toHaveProperty('id');
 				expect(res.body).toHaveProperty('username', registerUserDto.username);
-				expect(res.body).toHaveProperty('createdAt');
-				expect(res.body).toHaveProperty('updatedAt');
+				expect(res.body).not.toHaveProperty('createdAt');
+				expect(res.body).not.toHaveProperty('updatedAt');
 			});
 	});
 
@@ -84,7 +84,7 @@ describe('Application Behavior Tests (e2e)', () => {
 			.post('/auth/login')
 			.send(registerUserDto)
 			.expect((res) => {
-				expect(res.status).toBe(201);
+				expect(res.status).toBe(200);
 				expect(res.body).toHaveProperty('access_token');
 			});
 	});
@@ -121,18 +121,32 @@ describe('Application Behavior Tests (e2e)', () => {
 	});
 
 	it('/users/me (GET) - should return the user profile', async () => {
-		const { body } = await request(app.getHttpServer())
+		await request(app.getHttpServer())
 			.post('/auth/register')
 			.send(registerUserDto)
 			.expect(201);
+
+		const { body } = await request(app.getHttpServer())
+			.post('/auth/login')
+			.send(registerUserDto)
+			.expect(200);
 
 		await request(app.getHttpServer())
 			.get('/users/me')
 			.set('Authorization', `Bearer ${body.access_token}`)
 			.expect((res) => {
 				expect(res.status).toBe(200);
+				expect(res.body).toBeDefined();
+				expect(res.body).not.toHaveProperty('id');
 				expect(res.body).toHaveProperty('username', registerUserDto.username);
+				expect(res.body).not.toHaveProperty('password');
+				expect(res.body).not.toHaveProperty('createdAt');
+				expect(res.body).not.toHaveProperty('updatedAt');
 			});
+	});
+
+	it('/users/me (GET) - should fail if the access token is missing', async () => {
+		await request(app.getHttpServer()).get('/users/me').expect(401);
 	});
 
 	it('/users/me (GET) - should fail if the access token is invalid', async () => {
@@ -141,4 +155,23 @@ describe('Application Behavior Tests (e2e)', () => {
 			.set('Authorization', 'Bearer invalid_token')
 			.expect(401);
 	});
+
+	// it('/users/me (GET) - should fail if the access token is expired', async () => {
+	// 	await request(app.getHttpServer())
+	// 		.post('/auth/register')
+	// 		.send(registerUserDto)
+	// 		.expect(201);
+	//
+	// 	const { body } = await request(app.getHttpServer())
+	// 		.post('/auth/login')
+	// 		.send(registerUserDto)
+	// 		.expect(200);
+	//
+	// 	await new Promise((resolve) => setTimeout(resolve, 2000));
+	//
+	// 	await request(app.getHttpServer())
+	// 		.get('/users/me')
+	// 		.set('Authorization', `Bearer ${body.access_token}`)
+	// 		.expect(401);
+	// });
 });
