@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+	BadRequestException,
+	ConflictException,
+	Injectable,
+	Logger,
+} from '@nestjs/common';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { UserDto } from './dto/user.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -12,6 +17,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { JwtBlacklistService } from './jwt-blacklist.service';
 import { v4 as uuidv4 } from 'uuid';
+import { ChangePasswordDto } from '../users/dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -59,7 +65,7 @@ export class AuthService {
 		};
 	}
 
-	async logout(token: string): Promise<void> {
+	async revokeToken(token: string): Promise<void> {
 		const decoded = this.jwtService.decode(token) as JwtPayload;
 
 		if (!decoded || !decoded.jti || !decoded.exp) {
@@ -70,6 +76,38 @@ export class AuthService {
 			jti: decoded.jti,
 			exp: decoded.exp,
 		});
+	}
+
+	async changePassword(
+		id: number,
+		token: string,
+		{ oldPassword, newPassword }: ChangePasswordDto
+	): Promise<void> {
+		const user = await this.prisma.user.findUnique({ where: { id } });
+		if (!user) {
+			this.logger.error(`User with id ${id} not found`);
+			throw new Error(`User not found`);
+		}
+
+		const isCorrectPassword = await this.comparePasswords(
+			oldPassword,
+			user.password
+		);
+
+		if (!isCorrectPassword) {
+			throw new BadRequestException('Invalid password');
+		}
+
+		const updatedUser = await this.prisma.user.update({
+			where: { id },
+			data: {
+				password: await this.hashPassword(newPassword),
+			},
+		});
+
+		console.log('updatedUser', JSON.stringify(updatedUser, null, 2));
+
+		await this.revokeToken(token);
 	}
 
 	async validateUser({

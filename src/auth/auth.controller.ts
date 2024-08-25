@@ -7,7 +7,7 @@ import {
 	Req,
 	UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { AuthService } from './auth.service';
 import { UserDto } from './dto/user.dto';
@@ -18,6 +18,8 @@ import { Request } from 'express';
 import { LoginUserDto } from './dto/login-user.dto';
 import { GetAccessToken } from '../decorators/get-access-token.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GetUser } from '../decorators/get-user.decorator';
+import { ChangePasswordDto } from '../users/dto/change-password.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -41,8 +43,21 @@ export class AuthController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('logout')
-	@HttpCode(200)
-	logout(@GetAccessToken() token: string): Promise<void> {
-		return this.authService.logout(token);
+	@HttpCode(204)
+	@ApiBearerAuth()
+	async logout(@GetAccessToken() token: string): Promise<void> {
+		await this.authService.revokeToken(token);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('change-password')
+	@HttpCode(204)
+	@ApiBearerAuth()
+	async changePassword(
+		@GetUser() { id }: User,
+		@GetAccessToken() token: string,
+		@Body() changePasswordDto: ChangePasswordDto
+	): Promise<void> {
+		await this.authService.changePassword(id, token, changePasswordDto);
 	}
 }

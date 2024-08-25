@@ -41,16 +41,14 @@ export class UsersService {
 		}
 	}
 
-	async getUserByUsername(username: string): Promise<UserDto> {
+	async getUser(id: number): Promise<UserDto> {
 		try {
-			const user = await this.prisma.user.findUnique({ where: { username } });
+			const user = await this.prisma.user.findUnique({ where: { id } });
 			return plainToInstance(UserDto, user);
 		} catch (e) {
 			if (e instanceof Prisma.PrismaClientKnownRequestError) {
 				if (e.code === 'P2025') {
-					throw new NotFoundException(
-						`User with username ${username} not found`
-					);
+					throw new NotFoundException(`User not found`);
 				}
 			}
 			this.logger.error(e);
@@ -65,7 +63,7 @@ export class UsersService {
 				data: { username },
 			});
 
-			// TODO logout user?
+			// note: if we need the username change to be reflected in the JWT token, we need to log the user out and back in
 
 			return plainToInstance(UserDto, user);
 		} catch (e) {

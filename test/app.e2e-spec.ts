@@ -166,7 +166,7 @@ describe('Application Behavior Tests (e2e)', () => {
 		await request(app.getHttpServer())
 			.get('/auth/logout')
 			.set('Authorization', `Bearer ${accessToken}`)
-			.expect(200);
+			.expect(204);
 
 		await request(app.getHttpServer())
 			.get('/users/me')
@@ -185,7 +185,7 @@ describe('Application Behavior Tests (e2e)', () => {
 		await request(app.getHttpServer())
 			.get('/auth/logout')
 			.set('Authorization', `Bearer ${currentAccessToken}`)
-			.expect(200);
+			.expect(204);
 
 		await request(app.getHttpServer())
 			.get('/users/me')
@@ -235,6 +235,32 @@ describe('Application Behavior Tests (e2e)', () => {
 			.patch('/users/me')
 			.set('Authorization', `Bearer ${accessToken}`)
 			.send({ username: registerUserDto.username })
+			.expect(200);
+	});
+
+	it('/auth/change-password (POST) - should change the user password', async () => {
+		const accessToken = await registerUserAndLogin();
+		const newPassword = 'NewPassword123!';
+
+		await request(app.getHttpServer())
+			.post('/auth/change-password')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send({ oldPassword: registerUserDto.password, newPassword })
+			.expect(204);
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.expect(401);
+
+		const { body } = await request(app.getHttpServer())
+			.post('/auth/login')
+			.send({ ...registerUserDto, password: newPassword })
+			.expect(200);
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${body.access_token}`)
 			.expect(200);
 	});
 

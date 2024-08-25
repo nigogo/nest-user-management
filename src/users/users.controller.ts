@@ -15,9 +15,8 @@ export class UsersController {
 	@UseGuards(JwtAuthGuard)
 	@Get('me')
 	@ApiBearerAuth()
-	// TODO i can get by id here, more robust
-	async me(@GetUser() { username }: User): Promise<UserDto> {
-		return this.usersService.getUserByUsername(username);
+	async me(@GetUser() { id }: User): Promise<UserDto> {
+		return this.usersService.getUser(id);
 	}
 
 	@UseGuards(JwtAuthGuard)
