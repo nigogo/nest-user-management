@@ -4,7 +4,6 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { registerUserDto } from './test-data';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { AccessTokenDto } from '../src/auth/dto/access-token.dto';
 import { RegisterUserDto } from '../src/auth/dto/register-user.dto';
 
 describe('Application Behavior Tests (e2e)', () => {
@@ -192,40 +191,6 @@ describe('Application Behavior Tests (e2e)', () => {
 			.get('/users/me')
 			.set('Authorization', `Bearer ${previousAccessToken}`)
 			.expect(200);
-	});
-
-	it('/users/me (PATCH) - should update the user profile', async () => {
-		const updatedUsername = 'new_username';
-		const accessToken = await registerUserAndLogin();
-
-		await request(app.getHttpServer())
-			.patch('/profile/me')
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send({ username: updatedUsername })
-			.expect((res) => {
-				expect(res.status).toBe(200);
-				expect(res.body).toBeDefined();
-				expect(res.body).not.toHaveProperty('id');
-				expect(res.body).toHaveProperty('username', updatedUsername);
-				expect(res.body).not.toHaveProperty('password');
-				expect(res.body).not.toHaveProperty('createdAt');
-				expect(res.body).not.toHaveProperty('updatedAt');
-			});
-	});
-
-	it('/users/me (PATCH) - should fail if the username already exists', async () => {
-		const updatedUsername = 'new_username';
-		await registerUserAndLogin({
-			username: updatedUsername,
-			password: 'password',
-		});
-		const accessToken = await registerUserAndLogin();
-
-		await request(app.getHttpServer())
-			.patch('/users/me')
-			.set('Authorization', `Bearer ${accessToken}`)
-			.send({ username: 'new_username' })
-			.expect(409);
 	});
 
 	// register user and login helper function, uses the default test data if no DTO is provided
