@@ -119,4 +119,26 @@ describe('Application Behavior Tests (e2e)', () => {
 			.send({ ...registerUserDto, password: 'wrong_password' })
 			.expect(401);
 	});
+
+	it('/users/me (GET) - should return the user profile', async () => {
+		const { body } = await request(app.getHttpServer())
+			.post('/auth/register')
+			.send(registerUserDto)
+			.expect(201);
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${body.access_token}`)
+			.expect((res) => {
+				expect(res.status).toBe(200);
+				expect(res.body).toHaveProperty('username', registerUserDto.username);
+			});
+	});
+
+	it('/users/me (GET) - should fail if the access token is invalid', async () => {
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', 'Bearer invalid_token')
+			.expect(401);
+	});
 });
