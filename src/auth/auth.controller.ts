@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Get,
 	HttpCode,
 	Post,
 	Req,
@@ -15,6 +16,8 @@ import { User } from '../interfaces/user.interface';
 import { AccessTokenDto } from './dto/access-token.dto';
 import { Request } from 'express';
 import { LoginUserDto } from './dto/login-user.dto';
+import { GetAccessToken } from '../decorators/get-access-token.decorator';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -34,5 +37,12 @@ export class AuthController {
 	@ApiBody({ type: LoginUserDto, required: true })
 	login(@Req() req: Request & { user: User }): Promise<AccessTokenDto> {
 		return this.authService.login(req.user);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Get('logout')
+	@HttpCode(200)
+	logout(@GetAccessToken() token: string): Promise<void> {
+		return this.authService.logout(token);
 	}
 }

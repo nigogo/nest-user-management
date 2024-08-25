@@ -8,6 +8,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import * as process from 'node:process';
+import { JwtBlacklistService } from './jwt-blacklist.service';
 
 @Module({
 	imports: [
@@ -18,7 +19,13 @@ import * as process from 'node:process';
 			signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
 		}),
 	],
-	providers: [AuthService, PrismaService, LocalStrategy, JwtStrategy],
+	providers: [
+		AuthService,
+		PrismaService,
+		LocalStrategy,
+		JwtStrategy,
+		JwtBlacklistService,
+	],
 	controllers: [AuthController],
 	exports: [AuthService],
 })

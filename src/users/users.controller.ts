@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { User } from '../interfaces/user.interface';
 import { GetUser } from '../decorators/get-user.decorator';
@@ -13,8 +13,8 @@ export class UsersController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('me')
+	@ApiBearerAuth()
 	async me(@GetUser() { username }: User): Promise<UserDto> {
-		console.log('username', username);
 		return this.usersService.getUserByUsername(username);
 	}
 }

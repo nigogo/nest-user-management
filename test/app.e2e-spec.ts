@@ -4,6 +4,7 @@ import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { registerUserDto } from './test-data';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { RegisterUserDto } from '../src/auth/dto/register-user.dto';
 
 describe('Application Behavior Tests (e2e)', () => {
 	let app: INestApplication;
@@ -121,19 +122,11 @@ describe('Application Behavior Tests (e2e)', () => {
 	});
 
 	it('/users/me (GET) - should return the user profile', async () => {
-		await request(app.getHttpServer())
-			.post('/auth/register')
-			.send(registerUserDto)
-			.expect(201);
-
-		const { body } = await request(app.getHttpServer())
-			.post('/auth/login')
-			.send(registerUserDto)
-			.expect(200);
+		const accessToken = await registerUserAndLogin();
 
 		await request(app.getHttpServer())
 			.get('/users/me')
-			.set('Authorization', `Bearer ${body.access_token}`)
+			.set('Authorization', `Bearer ${accessToken}`)
 			.expect((res) => {
 				expect(res.status).toBe(200);
 				expect(res.body).toBeDefined();
@@ -157,21 +150,63 @@ describe('Application Behavior Tests (e2e)', () => {
 	});
 
 	it('/users/me (GET) - should fail if the access token is expired', async () => {
-		await request(app.getHttpServer())
-			.post('/auth/register')
-			.send(registerUserDto)
-			.expect(201);
+		const accessToken = await registerUserAndLogin();
 
+		await new Promise((resolve) => setTimeout(resolve, 3000));
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.expect(401);
+	});
+
+	it('/auth/logout (POST) - should revoke the access token', async () => {
+		const accessToken = await registerUserAndLogin();
+
+		await request(app.getHttpServer())
+			.get('/auth/logout')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.expect(200);
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.expect(401);
+	});
+
+	it('/auth/logout (POST) - should revoke the current access token only', async () => {
+		const previousAccessToken = await registerUserAndLogin();
 		const { body } = await request(app.getHttpServer())
 			.post('/auth/login')
 			.send(registerUserDto)
 			.expect(200);
+		const currentAccessToken = body.access_token;
 
-		await new Promise((resolve) => setTimeout(resolve, 2000));
+		await request(app.getHttpServer())
+			.get('/auth/logout')
+			.set('Authorization', `Bearer ${currentAccessToken}`)
+			.expect(200);
 
 		await request(app.getHttpServer())
 			.get('/users/me')
-			.set('Authorization', `Bearer ${body.access_token}`)
-			.expect(401);
+			.set('Authorization', `Bearer ${previousAccessToken}`)
+			.expect(200);
 	});
+
+	// register user and login helper function, uses the default test data if no DTO is provided
+	const registerUserAndLogin = async (
+		dto: RegisterUserDto = registerUserDto
+	): Promise<string> => {
+		await request(app.getHttpServer())
+			.post('/auth/register')
+			.send(dto)
+			.expect(201);
+
+		const { body } = await request(app.getHttpServer())
+			.post('/auth/login')
+			.send(dto)
+			.expect(200);
+
+		return body.access_token;
+	};
 });

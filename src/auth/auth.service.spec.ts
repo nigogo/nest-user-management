@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import { registerUserDto, user, userDto } from '../../test/test-data';
 import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtBlacklistService } from './jwt-blacklist.service';
 
 describe('AuthService', () => {
 	let service: AuthService;
@@ -19,7 +20,7 @@ describe('AuthService', () => {
 					signOptions: { expiresIn: '2m' },
 				}),
 			],
-			providers: [AuthService, PrismaService],
+			providers: [AuthService, PrismaService, JwtBlacklistService],
 		})
 			.overrideProvider(PrismaService)
 			.useValue({

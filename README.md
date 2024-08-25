@@ -23,6 +23,7 @@ Use `docker compose up api db -d` for fully containerized project.
 * If you are having trouble with the database, you may need to run `docker compose down -v` to remove the volumes.
 
 ## Decisions
+* The /auth/logout route will invalidate the user's current session, but will not 'revoke' all tokens of that user.
 * I will not test controllers directly, but instead use e2e tests for confidence in application behavior and DTO unit tests for controllers.
 * I decided to write unit test for the logic in the service layer ~~and integration tests for the controllers~~.
 * I wanted to have a test database for ~~integration~~ e2e tests, so I set up `test:e2e` script to start a test database container and run all controller tests in watch mode.
