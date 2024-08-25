@@ -166,7 +166,7 @@ describe('Application Behavior Tests (e2e)', () => {
 		await request(app.getHttpServer())
 			.get('/auth/logout')
 			.set('Authorization', `Bearer ${accessToken}`)
-			.expect(200);
+			.expect(204);
 
 		await request(app.getHttpServer())
 			.get('/users/me')
@@ -185,11 +185,82 @@ describe('Application Behavior Tests (e2e)', () => {
 		await request(app.getHttpServer())
 			.get('/auth/logout')
 			.set('Authorization', `Bearer ${currentAccessToken}`)
-			.expect(200);
+			.expect(204);
 
 		await request(app.getHttpServer())
 			.get('/users/me')
 			.set('Authorization', `Bearer ${previousAccessToken}`)
+			.expect(200);
+	});
+
+	it('/users/me (PATCH) - should update the user profile', async () => {
+		const accessToken = await registerUserAndLogin();
+		const updatedUsername = 'new_username';
+
+		await request(app.getHttpServer())
+			.patch('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send({ username: updatedUsername })
+			.expect((res) => {
+				expect(res.status).toBe(200);
+				expect(res.body).toBeDefined();
+				expect(res.body).not.toHaveProperty('id');
+				expect(res.body).toHaveProperty('username', updatedUsername);
+				expect(res.body).not.toHaveProperty('password');
+				expect(res.body).not.toHaveProperty('createdAt');
+				expect(res.body).not.toHaveProperty('updatedAt');
+			});
+	});
+
+	it('/users/me (PATCH) - should fail if the username already exists', async () => {
+		const accessToken = await registerUserAndLogin();
+		const updatedUsername = 'new_username';
+
+		await request(app.getHttpServer())
+			.post('/auth/register')
+			.send({ ...registerUserDto, username: updatedUsername })
+			.expect(201);
+
+		await request(app.getHttpServer())
+			.patch('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send({ username: 'new_username' })
+			.expect(409);
+	});
+
+	it('/users/me (PATCH) - should return 200 if no data is changed', async () => {
+		const accessToken = await registerUserAndLogin();
+
+		await request(app.getHttpServer())
+			.patch('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send({ username: registerUserDto.username })
+			.expect(200);
+	});
+
+	it('/auth/change-password (POST) - should change the user password', async () => {
+		const accessToken = await registerUserAndLogin();
+		const newPassword = 'NewPassword123!';
+
+		await request(app.getHttpServer())
+			.post('/auth/change-password')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.send({ oldPassword: registerUserDto.password, newPassword })
+			.expect(204);
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${accessToken}`)
+			.expect(401);
+
+		const { body } = await request(app.getHttpServer())
+			.post('/auth/login')
+			.send({ ...registerUserDto, password: newPassword })
+			.expect(200);
+
+		await request(app.getHttpServer())
+			.get('/users/me')
+			.set('Authorization', `Bearer ${body.access_token}`)
 			.expect(200);
 	});
 
