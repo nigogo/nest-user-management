@@ -84,8 +84,40 @@ describe('Application Behavior Tests (e2e)', () => {
 			.post('/auth/login')
 			.send(registerUserDto)
 			.expect((res) => {
+				console.log(JSON.stringify(res.body, null, 2));
 				expect(res.status).toBe(201);
 				expect(res.body).toHaveProperty('access_token');
 			});
+	});
+
+	it('/auth/login (POST) - should fail if the user does not exist', async () => {
+		await request(app.getHttpServer())
+			.post('/auth/login')
+			.send(registerUserDto)
+			.expect(401);
+	});
+
+	it('/auth/login (POST) - should fail if the username is incorrect', async () => {
+		await request(app.getHttpServer())
+			.post('/auth/register')
+			.send(registerUserDto)
+			.expect(201);
+
+		await request(app.getHttpServer())
+			.post('/auth/login')
+			.send({ ...registerUserDto, username: 'wrong_username' })
+			.expect(401);
+	});
+
+	it('/auth/login (POST) - should fail if the password is incorrect', async () => {
+		await request(app.getHttpServer())
+			.post('/auth/register')
+			.send(registerUserDto)
+			.expect(201);
+
+		await request(app.getHttpServer())
+			.post('/auth/login')
+			.send({ ...registerUserDto, password: 'wrong_password' })
+			.expect(401);
 	});
 });
