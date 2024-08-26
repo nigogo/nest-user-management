@@ -11,12 +11,13 @@ This project is a simple user management system that allows users to register, l
 5. `npm run prisma:migrate` (Run migrations)
 6. `npm run start:dev:local` (Start the api in development mode)
 
-Use `docker compose up api db -d` for fully containerized project.
-
 ### Testing
-* `npm run test` (Run unit tests)
+* `npm run test:unit` (Run unit tests)
 * `npm run test:e2e` (Run e2e tests, Linux/MacOS only - see npm script)
 * `npm run test:e2e` (Run again if the first run fails, docker container may not be ready)
+
+> [!TIP]
+> If you are using docker compose in userspace, you can run `npm run test:e2e:user` instead.
 
 ### Troubleshooting
 * Windows handles docker volumes differently than Linux and MacOS. If you are using Windows, you may need to change the volume paths in the `docker-compose.yml` file.
