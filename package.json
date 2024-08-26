@@ -1,10 +1,10 @@
 {
   "name": "nest-user-management",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
-  "license": "UNLICENSED",
+  "version": "0.1.0",
+  "description": "A simple user management API that allows a user to register, login, view and update their profile.",
+  "author": "Nico Harather",
+  "private": false,
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -17,7 +17,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:unit": "export $(grep -v '^#' .env.test | xargs) && jest --config ./test/jest-unit-spec.json --watch",
-    "test:e2e": "export $(grep -v '^#' .env.test | xargs) && sudo -preserve-env=TEST_DB_PORT,DB_URL docker compose up test-db -d && npx prisma migrate deploy && jest --config ./test/jest-e2e.json --watch",
+    "test:e2e": "sudo -v && export $(grep -v '^#' .env.test | xargs) && sudo -preserve-env=TEST_DB_PORT,DB_URL docker compose up test-db -d && npx prisma migrate deploy && jest --config ./test/jest-e2e.json --watch",
+    "test:e2e:user": "export $(grep -v '^#' .env.test | xargs) && docker compose up test-db -d && npx prisma migrate deploy && jest --config ./test/jest-e2e.json --watch",
     "prisma:studio": "export $(grep -v '^#' .env.local | xargs) && npx prisma studio",
     "prisma:generate": "export $(grep -v '^#' .env.local | xargs) && npx prisma generate",
     "prisma:migrate": "export $(grep -v '^#' .env.local | xargs) && npx prisma migrate deploy"

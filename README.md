@@ -5,18 +5,24 @@ This project is a simple user management system that allows users to register, l
 
 ## Setup
 1. `npm install` (Install dependencies)
-2. `cp .env.example .env` (Create a .env file)
+2. `cp .env.example .env` (Copy the .env.example file to .env)
 3. `docker compose up db -d` (Start the database container)
 4. `npm run prisma:generate` (Generate Prisma client)
 5. `npm run prisma:migrate` (Run migrations)
 6. `npm run start:dev:local` (Start the api in development mode)
-
-Use `docker compose up api db -d` for fully containerized project.
+7. Go to `http://localhost:3000/api/v1` to view the Swagger documentation
 
 ### Testing
-* `npm run test` (Run unit tests)
+
+> [!NOTE]
+> The test scripts assume that you run linux or MacOS. If you are using Windows, you may need to change them.
+
+* `npm run test:unit` (Run unit tests)
 * `npm run test:e2e` (Run e2e tests, Linux/MacOS only - see npm script)
 * `npm run test:e2e` (Run again if the first run fails, docker container may not be ready)
+
+> [!TIP]
+> If you are using docker compose in userspace, you can run `npm run test:e2e:user` instead.
 
 ### Troubleshooting
 * Windows handles docker volumes differently than Linux and MacOS. If you are using Windows, you may need to change the volume paths in the `docker-compose.yml` file.

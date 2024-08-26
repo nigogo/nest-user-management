@@ -17,7 +17,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { JwtBlacklistService } from './jwt-blacklist.service';
 import { v4 as uuidv4 } from 'uuid';
-import { ChangePasswordDto } from '../users/dto/change-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
