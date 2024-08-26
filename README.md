@@ -10,6 +10,7 @@ This project is a simple user management system that allows users to register, l
 4. `npm run prisma:generate` (Generate Prisma client)
 5. `npm run prisma:migrate` (Run migrations)
 6. `npm run start:dev:local` (Start the api in development mode)
+7. Go to `http://localhost:3000/api/v1` to view the Swagger documentation
 
 ### Testing
 
