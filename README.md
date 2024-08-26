@@ -5,13 +5,17 @@ This project is a simple user management system that allows users to register, l
 
 ## Setup
 1. `npm install` (Install dependencies)
-2. `cp .env.example .env` (Create a .env file)
+2. `cp .env.example .env` (Copy the .env.example file to .env)
 3. `docker compose up db -d` (Start the database container)
 4. `npm run prisma:generate` (Generate Prisma client)
 5. `npm run prisma:migrate` (Run migrations)
 6. `npm run start:dev:local` (Start the api in development mode)
 
 ### Testing
+
+> [!NOTE]
+> The test scripts assume that you run linux or MacOS. If you are using Windows, you may need to change them.
+
 * `npm run test:unit` (Run unit tests)
 * `npm run test:e2e` (Run e2e tests, Linux/MacOS only - see npm script)
 * `npm run test:e2e` (Run again if the first run fails, docker container may not be ready)
