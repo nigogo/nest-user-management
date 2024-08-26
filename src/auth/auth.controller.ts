@@ -19,7 +19,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { GetAccessToken } from '../decorators/get-access-token.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GetUser } from '../decorators/get-user.decorator';
-import { ChangePasswordDto } from '../users/dto/change-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 @ApiTags('auth')
